@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Mathematical Constants</title>
+
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                min-height: 100vh;
+                padding: 40px 20px;
+
+                background: #080a0f;
+                color: #f1f3f7;
+
+                font-family:
+                    Inter,
+                    system-ui,
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    sans-serif;
+            }
+
+            .container {
+                width: min(900px, 100%);
+                margin: 0 auto;
+            }
+
+            .title {
+                text-align: center;
+                font-family: Georgia, serif;
+                font-size: 90px;
+                line-height: 1;
+                margin-bottom: 5px;
+            }
+
+            .subtitle {
+                text-align: center;
+                color: #858c9c;
+                font-size: 14px;
+                margin-bottom: 35px;
+            }
+
+            .input-container {
+                display: flex;
+                gap: 10px;
+            }
+
+            select {
+                height: 52px;
+                padding: 0 16px;
+
+                border: 1px solid #292f3b;
+                border-radius: 12px;
+
+                background: #11141b;
+                color: white;
+
+                outline: none;
+                font-size: 15px;
+                cursor: pointer;
+            }
+
+            select:focus {
+                border-color: #6875ff;
+            }
+
+            input {
+                flex: 1;
+                height: 52px;
+                padding: 0 16px;
+
+                border: 1px solid #292f3b;
+                border-radius: 12px;
+
+                background: #11141b;
+                color: white;
+
+                outline: none;
+                font-size: 15px;
+            }
+
+            input:focus {
+                border-color: #6875ff;
+            }
+
+            input::placeholder {
+                color: #626978;
+            }
+
+            button {
+                height: 52px;
+                padding: 0 25px;
+
+                border: 0;
+                border-radius: 12px;
+
+                background: #6875ff;
+                color: white;
+
+                font-size: 15px;
+                font-weight: 600;
+
+                cursor: pointer;
+            }
+
+            button:hover {
+                background: #7884ff;
+            }
+
+            button:disabled {
+                opacity: 0.5;
+                cursor: wait;
+            }
+
+            #status {
+                height: 25px;
+                margin-top: 14px;
+
+                text-align: center;
+
+                color: #858c9c;
+                font-size: 13px;
+            }
+
+            .result {
+                display: none;
+                margin-top: 20px;
+            }
+
+            .result-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                margin-bottom: 10px;
+
+                color: #858c9c;
+                font-size: 13px;
+            }
+
+            #pi {
+                width: 100%;
+                max-height: 600px;
+
+                padding: 20px;
+
+                background: #0b0e14;
+                border: 1px solid #242a36;
+                border-radius: 14px;
+
+                overflow-y: auto;
+
+                font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+
+                font-size: 15px;
+                line-height: 1.7;
+
+                overflow-wrap: anywhere;
+                word-break: break-word;
+
+                color: #dce1ea;
+            }
+
+            #pi::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            #pi::-webkit-scrollbar-thumb {
+                background: #303746;
+                border-radius: 10px;
+            }
+
+            .info {
+                display: flex;
+                justify-content: space-between;
+
+                margin-top: 12px;
+
+                color: #6f7787;
+                font-size: 12px;
+            }
+
+            @media (max-width: 600px) {
+                body {
+                    padding: 25px 12px;
+                }
+
+                .title {
+                    font-size: 70px;
+                }
+
+                .input-container {
+                    flex-direction: column;
+                }
+
+                select,
+                button {
+                    width: 100%;
+                }
+
+                .info {
+                    flex-direction: column;
+                    gap: 5px;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <main class="container">
+            <div class="title" id="main-title">π</div>
+
+            <div class="subtitle">
+                Created by Michael Ushakov (CEO Spatiolix)
+            </div>
+
+            <div class="input-container">
+                <select id="constant-select">
+                    <option value="pi">π (Pi)</option>
+                    <option value="e">e (Euler's number)</option>
+                    <option value="phi">φ (Golden Ratio)</option>
+                </select>
+
+                <input
+                    class="digits"
+                    type="number"
+                    min="1"
+                    placeholder="Введите количество знаков после запятой"
+                />
+
+                <button class="start">Calculate</button>
+            </div>
+
+            <div id="status"></div>
+
+            <div class="result" id="result">
+                <div class="result-header">
+                    <span id="result-symbol">π</span>
+                    <span id="time"></span>
+                </div>
+
+                <div id="pi"></div>
+            </div>
+        </main>
+
+        <script>
+            const select = document.getElementById("constant-select");
+            const mainTitle = document.getElementById("main-title");
+            const resultSymbol = document.getElementById("result-symbol");
+            const algorithmName = document.getElementById("algorithm-name");
+            const start_btn = document.querySelector(".start");
+
+            select.addEventListener("change", (e) => {
+                const val = e.target.value;
+                if (val === "pi") {
+                    mainTitle.textContent = "π";
+                    resultSymbol.textContent = "π";
+                    algorithmName.textContent = "Chudnovsky algorithm";
+                } else if (val === "e") {
+                    mainTitle.textContent = "e";
+                    resultSymbol.textContent = "e";
+                    algorithmName.textContent =
+                        "Taylor series / Taylor-Brother series";
+                } else if (val === "phi") {
+                    mainTitle.textContent = "φ";
+                    resultSymbol.textContent = "φ";
+                    algorithmName.textContent = "Square root method";
+                }
+            });
+
+            start_btn.addEventListener("click", async function () {
+                const count_c = document.querySelector(".digits").value;
+                const number_user = document.getElementById("constant-select").value;
+
+                if (number_user === "pi") {
+                    async function readFirstCharacters() {
+                        try {
+                            const response = await fetch(
+                                "pi.txt",
+                            );
+
+                            if (!response.ok) {
+                                throw new Error(
+                                    `Ошибка загрузки файла: ${response.status}`,
+                                );
+                            }
+
+                            const text = await response.text();
+
+                            const firstFive = text.slice(0, count_c);
+
+                            document.getElementById("pi").textContent = "3."+firstFive;
+                            document.getElementById("result").style.display = "block";
+
+                        } catch (error) {
+                            console.error("Не удалось прочитать файл:", error);
+                        }
+                    }
+
+                    readFirstCharacters();
+                } else if (number_user === "e") {
+                    async function readFirstCharacters() {
+                        try {
+                            const response = await fetch(
+                                "e.txt",
+                            );
+
+                            if (!response.ok) {
+                                throw new Error(
+                                    `Ошибка загрузки файла: ${response.status}`,
+                                );
+                            }
+
+                            const text = await response.text();
+
+                            const firstFive = text.slice(0, count_c);
+
+                            document.getElementById("pi").textContent = firstFive;
+                            document.getElementById("result").style.display = "block";
+
+                        } catch (error) {
+                            console.error("Не удалось прочитать файл:", error);
+                        }
+                    }
+
+                    readFirstCharacters();
+                } else if (number_user === "phi") {
+                    async function readFirstCharacters() {
+                        try {
+                            const response = await fetch(
+                                "phi.txt",
+                            );
+
+                            if (!response.ok) {
+                                throw new Error(
+                                    `Ошибка загрузки файла: ${response.status}`,
+                                );
+                            }
+
+                            const text = await response.text();
+
+                            const firstFive = text.slice(0, count_c);
+
+                            document.getElementById("pi").textContent = firstFive;
+                            document.getElementById("result").style.display = "block";
+
+                        } catch (error) {
+                            console.error("Не удалось прочитать файл:", error);
+                        }
+                    }
+
+                    readFirstCharacters();
+                }
+            });
+        </script>
+    </body>
+</html>
